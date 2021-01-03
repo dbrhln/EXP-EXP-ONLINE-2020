@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html>
+	<head>
+    <script src="jspsych-6.1.0/jspsych.js"></script>
+		<script src="jspsych-6.1.0/jquery.min.js"></script>
+    <script src="jspsych-6.1.0/plugins/jspsych-html-keyboard-response.js"></script>
+    <script src="jspsych-6.1.0/plugins/jspsych-image-keyboard-response.js"></script>
+		<script src="jspsych-6.1.0/plugins/jspsych-fullscreen.js"></script>
+    <script src="jspsych-6.1.0/plugins/jspsych-rdk.js"></script>
+    <link href="jspsych-6.1.0/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+
+</head>
+	<body style="background-color:gray;"></body>
+	<script>
+/*<script src="seedrandom.min.js">
+	Math.seedrandom(subject_id.toString()); */
+
+	/*
+	We would appreciate it if you cited this paper when you use the RDK:
+	Rajananda, S., Lau, H. & Odegaard, B., (2018). A Random-Dot Kinematogram for Web-Based Vision Research. Journal of Open Research Software. 6(1), p.6. DOI: [http://doi.org/10.5334/jors.194]
+	*/
+
+
+	/* to do: add patch-contingent rewards calculated based on training; timeouts; cohvec for different blocks (stable + change point); data output; check trial times
+	*/
+
+	/*-----------------------------------------
+	 ------	EXPERIMENTAL PARAMETERS
+		-----------------------------------------*/
+	    /* Experiment timelines  */
+	    var experiment_timeline = [];
+
+	    var subject_id = Math.floor(Math.random()*100000);
+
+	    var nBlocks = 8; // Number of experiment blocks (multiple of 8)
+	    //var nPracTrialsPerBlock = 1; // 6 practice
+	    //var nExpTrialsPerBlock = 2;  // 24 experimental trials (repetitions would be nExpTrialsPerBlock/nStim
+
+			var nPracTrials = 10; // 60
+			var nExpTrials = 10; // 20
+
+	    var timeout = 5000;
+	    var iti = 500; // intertrial interval 500
+
+	    var prac_conditions = [1,2,3,4]; // tone, dot #don't need this
+	    var test_conditions = [1,2,3,4]; //[3, 4, 5, 6, 7, 8, 9, 10, 11, 12]; // dim 1, dim 2 garner conditions
+
+	    var cb = jsPsych.randomization.shuffle([1, 2]); // Counterbalancing
+	    var rkeyA = "f";
+	    var rkeyB = "j";
+	    if (cb[0] == 1){
+	        var Amap = "LEFT";
+	        var Bmap = "RIGHT";
+	    } else {
+	        var Amap = "RIGHT";
+	        var Bmap = "LEFT";
+	     };
+
+			var repeatelem = function(value,len){
+				var arr = [];
+				for (var i = 0; i < len; i++){
+					arr.push(value);
+				}
+				return arr;
+			};
+
+			var prac_len = nPracTrials/5 // No. of times each coherence is repeated in practice block
+			var prac_0 = repeatelem(0.8,prac_len)
+			var prac_A = repeatelem(0.4,prac_len)
+			var prac_B = repeatelem(0.3,prac_len)
+			var prac_C = repeatelem(0.2,prac_len)
+			var prac_D = repeatelem(0.1,prac_len)
+
+			var prac_cohs = prac_0.concat(prac_A,prac_B,prac_C,prac_D)
+
+			var experiment_type = 'stable' ;
+
+			// Stable task coherence levels
+			var stbBlkA = ['blkA',0.1,0.2] ;
+			var stbBlkB = ['blkB',0.3,0.4] ;
+			var stbBlkC = ['blkC',0.1,0.3] ;
+			var stbBlkD = ['blkD',0.2,0.4] ;
+			var stbBlkA_x = ['blkAx',0.2,0.1];
+			var stbBlkB_x = ['blkBx',0.4,0.3] ;
+			var stbBlkC_x = ['blkCx',0.3,0.1] ;
+			var stbBlkD_x = ['blkDx',0.4,0.2] ;
+			var stbBlks = jsPsych.randomization.shuffle([stbBlkA,stbBlkB,stbBlkC,stbBlkD,stbBlkA_x,stbBlkB_x,stbBlkC_x,stbBlkD_x]);
+
+	    // Add data to all trials
+	    jsPsych.data.addProperties({
+	        subject: subject_id,
+	        counter_balance: cb[0]
+	    });
+
+			/*-----------------------------------------
+			 ------	INSTRUCTIONS
+				-----------------------------------------*/
+	    var welcome = {
+	      type: "html-keyboard-response",
+	      stimulus: "<p>Welcome to the experiment on decision making with moving dot stimuli.</p>" + "<p>Press any key to begin.</p>",
+	        data: {trial_event: 'instructions'}
+	    };
+
+	    var practice_instructions = {
+	      type: "html-keyboard-response",
+	      stimulus: "<p>This experiment begins with 1 block of " + String(nPracTrials)+ " practice trials.</p>" +
+				"<p>The practice block will familiarize you with the moving dot sitmuli.</p>" +
+				"<p>This will be followed by " + String(nBlocks) +" blocks of experiment trials. Each block will have " + String(nExpTrials) + " experiment trials.</p>" +
+	      "<p>Press any key to continue.</p>",
+	        data: {trial_event: 'instructions'}
+	    };
+
+	    var start_practice_instructions = {
+	      type: "html-keyboard-response",
+	      stimulus: "<p>This is the practice block.</p>"+
+				"<p>On each trial, you will be asked to indicate if the dots in the circle (the \"patch\") are moving right (by pressing 'f') or left (by pressing 'j')." +
+				"<p>You will be told whether you are correct or incorrect.</p>" +
+				"<p>This task will increase in difficulty across the block of" + String(nPracTrials) + "trials.</p>"+
+				"<p>Press any key to begin the practice trials.</p>",
+	        data: {trial_event: 'instructions'}
+	    };
+
+			// Make moving on to the experiment block contingent on practice performance?
+	    var end_practice_instructions = {
+	      type: "html-keyboard-response",
+	      stimulus: "<p> You have completed the practice block. </p>"+
+				"<p> To move on to the experiment blocks, press any key.</p>",
+	        data: {trial_event: 'instructions'}
+	    };
+
+			var experiment_instructions = {
+				type: "html-keyboard-response",
+				stimulus: "<p>Please read the instructions for the experiment block carefully.</p>" +
+				"<p> </p>"+
+				"<p>There will be 8 blocks. In each block, there are " + String(nExpTrials) + " experiment trials.</p>" +
+				"<p>On each trial, you will be asked to choose between a Patch A and Patch B. Patch A will be a blue circle and Patch B will be a green circle.</p>" +
+				"<p>The patch you have chosen will be presented and you will be asked to indicate if the dots are moving right (by pressing 'f') or left (by pressing 'j')." +
+				"<p>You will be told whether you are correct or incorrect. If you are correct, you will be rewarded 10 points.</p>" +
+				"<p>At the end of experiment, the total number of points you have accumulated will be converted into a monetary bonus (10 points = 5 cents).</p>" +
+				"<p>Press any key to begin.</p>",
+					data: {trial_event: 'instructions'}
+			};
+
+	    var end_experiment_instructions = {
+	      type: "html-keyboard-response",
+	      stimulus: "<p>Thank you for your participation. You may close your browser window.</p>",
+	        data: {trial_event: 'instructions'}
+	    };
+
+			//Selection trial
+			var patch_selection = {
+				type: "html-keyboard-response",
+				stimulus: "Please select either patch A (press 'f') or B (press 'j').",
+				choices: ['f','j'],
+				on_finish: function(data){
+					data.trial_event = 'Patch selection';
+					//data.selected_trial = jsPsych.pluginAPI.convertKeyCharacterToKeyCode(data.key_press);
+				}
+			}
+
+	/*-----------------------------------------
+	 ------	FUNCTION DEFINITIONS
+	  -----------------------------------------*/
+
+	// Function to generate trial
+	// ttype indicates if trial is a 'practice' or 'experiment'
+	// coherence is the coherence for the trial
+	var gentrial = function(ttype,coherence,coh_orientation){
+		if (coh_orientation == 180) {
+			var cchoice = 'f';
+		} else {
+			var cchoice = 'j';
+		}
+
+		if (ttype == 'Practice'){
+			var patch_color = 'black';
+		} else if (ttype == 'Patch_A') {
+			var patch_color = 'green';
+		} else if (ttype == 'Patch_B') {
+			var patch_color = 'blue';
+		}
+
+		var RDK_trial = [{
+			correct_choice: cchoice,
+			coherent_direction: coh_orientation,
+			coherence: coherence,
+			border_color: patch_color,
+			data: {trial_event: ttype}
+		}];
+		return RDK_trial;
+	}
+
+	//Function to create practice trials
+	var genPracticeblock = function(ntrials,coh) {
+		var pblock = [];
+		for (var tt = 0; tt < ntrials; tt++) {
+			var direc = jsPsych.randomization.sampleWithoutReplacement([0,180],1);
+			var newtrial = {
+				timeline: [fixation, base_trial, prac_feedback],
+				timeline_variables: gentrial('Practice',coh[tt],direc)
+			}
+			var pblock = pblock.concat(newtrial)
+		}
+		return pblock;
+	}
+
+	//Function to create experiment block
+	var genExpblock = function(ntrials,blkType,cohvec) {
+		var expblock = [];
+
+		for (var tt=0; tt < ntrials; tt++) {
+			var direc = jsPsych.randomization.sampleWithReplacement([0,180],2);
+			var newtriala = {
+				timeline: [base_trial],
+				timeline_variables: gentrial('Patch_A',cohvec[0],direc[0]),
+				conditional_function: function() {
+					var data = jsPsych.data.get().last(2).values()[0];
+					if (jsPsych.pluginAPI.convertKeyCodeToKeyCharacter(data.key_press) == 'f') {
+						return true;
+					} else {
+						return false;
+					}
+				}
+			}
+			var newtrialb = {
+				timeline: [base_trial],
+				timeline_variables: gentrial('Patch_B',cohvec[1],direc[1]),
+				conditional_function: function() {
+					var data = jsPsych.data.get().last(2).values()[0];
+					if (jsPsych.pluginAPI.convertKeyCodeToKeyCharacter(data.key_press) == 'j') {
+						return true;
+					} else {
+						return false;
+					}
+				}
+			}
+
+			var newtrial = {
+				data: {blkType: blkType},
+				timeline: [patch_selection, fixation, newtriala, newtrialb, exp_feedback]
+			}
+			var expblock = expblock.concat( newtrial );
+		}
+		return expblock;
+	}
+
+	/*-----------------------------------------
+	 ------	STIMULUS/TRIAL DEFINITIONS
+		-----------------------------------------*/
+
+	//Define fixation cross
+	var fixation = {
+			type: 'html-keyboard-response',
+			stimulus: '<div style="font-size:60px;">+</div>',
+			choices: jsPsych.NO_KEYS,
+			trial_duration: 1000,
+			data: {trial_event: 'fixation'},
+			background_color: 'black'
+	}
+
+	var prac_feedback = {
+	type: 'html-keyboard-response',
+	stimulus: function(){
+			var last_trial_correct = jsPsych.data.get().last(1).values()[0].correct;
+			if (last_trial_correct){
+				return "<p>Correct!</p>";
+			} else {
+				return "<p> Wrong.</p>";
+			}
+		},
+	choices: jsPsych.NO_KEYS,
+	data: {trial_event: 'prac_feedback'},
+	trial_duration: 1000
+	}
+
+	var exp_feedback = {
+	type: 'html-keyboard-response',
+	stimulus: function(){
+			var rewvec = [10,20];
+			var last_trial_correct = jsPsych.data.get().last(1).values()[0].correct;
+			if (last_trial_correct){
+				return "<p>Correct!</p> <p>+"+rewvec[0]+" points</p>";
+			} else {
+				return "<p> Wrong.</p>";
+			}
+		},
+	choices: jsPsych.NO_KEYS,
+	data: {trial_event: 'exp_feedback'},
+	trial_duration: 1000
+	}
+
+		//Define RDK stimulus
+		var base_trial = {
+			type: "rdk",
+			post_trial_gap: 500, //The Inter Trial Interval. You can either have no ITI, or have an ITI but change the display element to be the same color as the stimuli background to prevent flashing between trials
+			number_of_dots: 50, //Total number of dots in each aperture
+			RDK_type: 4, //The type of RDK used, 4 = different signal dots + random position
+			choices: ['f', 'j'], //Choices available to be keyed in by participant
+			trial_duration: -1, //Duration of each trial in ms, -1 for stimulus to be displayed until response
+      response_ends_trial: true,
+      dot_radius: 3, //in pixels
+      dot_life: 3, //in frames
+      move_distance: 5, //speed of dots in pixels per frame
+      aperture_type: 1, // circle
+      aperture_width: 300, //in Pixels
+      reinsert_type: 1, //where dot reappears if gone out of bounds, 1 for random
+      border: true, //border around aperture
+			background_color: "gray",
+			dot_color: "white",
+			data: jsPsych.timelineVariable('data'),
+			border_color: jsPsych.timelineVariable('border_color'), //border colour
+			coherence: jsPsych.timelineVariable('coherence'),
+			correct_choice: jsPsych.timelineVariable('correct_choice'),
+			coherent_direction: jsPsych.timelineVariable('coherent_direction'),
+			on_finish: function(data){
+				data.response = jsPsych.pluginAPI.convertKeyCodeToKeyCharacter(data.key_press);
+				data.correct = (data.response == data.correct_choice);
+			}
+		}
+
+		//Debrief block
+		var debrief_pblock = {
+			type: "html-keyboard-response",
+			stimulus: function(){
+				var trials = jsPsych.data.get().filter({trial_event: 'Practice'});
+				var correct_trials = trials.filter({correct: true});
+				var accuracy = Math.round(correct_trials.count() / trials.count() * 100);
+				var rt = Math.round(correct_trials.select('rt').mean());
+
+				return "<p>In the practice block, you responded correctly on "+accuracy+"% of the trials.</p>"+
+				"<p>Your average response time was "+rt+"ms.</p>"+
+				"<p>Press any key to continue the experiment.</p>";
+			}
+		};
+		var debrief_eblock = {
+			type: "html-keyboard-response",
+			stimulus: function(){
+				var trials = jsPsych.data.get().filter([{trial_event: 'Patch_A'},{trial_event: 'Patch_B'}]);
+				var correct_trials = trials.filter({correct: true});
+				var accuracy = Math.round(correct_trials.count() / trials.count() * 100);
+				var rt = Math.round(correct_trials.select('rt').mean());
+
+				return "<p>In this experiment block, you earned "+ accuracy +" points.</p>"+
+				"<p>Your average response time was "+rt+"ms.</p>"+
+				"<p>Press any key to complete the experiment. Thank you!</p>";
+			}
+		};
+
+		/*-----------------------------------------
+		 ------	GENERATE TRIAL BLOCKS
+			-----------------------------------------*/
+		//Create a block of practice trials
+		pblock = genPracticeblock(nPracTrials,prac_cohs);
+
+		var show_pblock = {
+			timeline: pblock
+		}
+
+		//Create experiment trials
+		var expblock = genExpblock(nExpTrials,'ABC',[0.1,0.9]);
+
+		var show_expblock = {
+			timeline: expblock
+		}
+
+		if (experiment_type =='stable'){
+			var expblock1 = genExpblock(nExpTrials,stbBlks[0][0],stbBlks[0].slice(1,3))
+			var expblock2 = genExpblock(nExpTrials,stbBlks[1][0],stbBlks[1].slice(1,3))
+			var expblock3 = genExpblock(nExpTrials,stbBlks[2][0],stbBlks[2].slice(1,3))
+			var expblock4 = genExpblock(nExpTrials,stbBlks[3][0],stbBlks[3].slice(1,3))
+			var expblock5 = genExpblock(nExpTrials,stbBlks[4][0],stbBlks[4].slice(1,3))
+			var expblock6 = genExpblock(nExpTrials,stbBlks[5][0],stbBlks[5].slice(1,3))
+			var expblock7 = genExpblock(nExpTrials,stbBlks[6][0],stbBlks[6].slice(1,3))
+			var expblock8 = genExpblock(nExpTrials,stbBlks[7][0],stbBlks[7].slice(1,3))
+
+			var show_expblock1 = {timeline: expblock1}
+			var show_expblock2 = {timeline: expblock2}
+			var show_expblock3 = {timeline: expblock3}
+			var show_expblock4 = {timeline: expblock4}
+			var show_expblock5 = {timeline: expblock5}
+			var show_expblock6 = {timeline: expblock6}
+			var show_expblock7 = {timeline: expblock7}
+			var show_expblock8 = {timeline: expblock8}
+		}
+
+		/*-----------------------------------------
+		 ------	SET UP TIMELINE
+			-----------------------------------------*/
+
+		experiment_timeline.push(welcome)
+		experiment_timeline.push(practice_instructions)
+		experiment_timeline.push(start_practice_instructions)
+		experiment_timeline.push(show_pblock)
+		experiment_timeline.push(debrief_pblock)
+		experiment_timeline.push(end_practice_instructions)
+		experiment_timeline.push(experiment_instructions)
+		experiment_timeline.push(show_expblock1)
+		experiment_timeline.push(debrief_eblock)
+		experiment_timeline.push(show_expblock2)
+		experiment_timeline.push(debrief_eblock)
+		experiment_timeline.push(show_expblock3)
+		experiment_timeline.push(debrief_eblock)
+		experiment_timeline.push(show_expblock4)
+		experiment_timeline.push(debrief_eblock)
+		experiment_timeline.push(show_expblock5)
+		experiment_timeline.push(debrief_eblock)
+		experiment_timeline.push(show_expblock6)
+		experiment_timeline.push(debrief_eblock)
+		experiment_timeline.push(show_expblock7)
+		experiment_timeline.push(debrief_eblock)
+		experiment_timeline.push(show_expblock8)
+		experiment_timeline.push(debrief_eblock)
+		/*-----------------------------------------
+		 ------	RUN EXPERIMENT & SAVE DATA
+			-----------------------------------------*/
+		function endExperiment(dataset,message){
+			$.post('submit',{"content": dataset}); // uncomment to post data
+			console.log(dataset) // comment out to avoid console log
+			setTimeout(message,1000)
+		}
+
+		jsPsych.init({
+			timeline: experiment_timeline,
+			on_finish: function(){ //Execute this when the experiment finishes
+				//jsPsych.data.displayData(); //Display the data onto the browser screen
+				//var dataset = jsPsych.data.get().csv()
+				endExperiment(jsPsych.data.get().json() , function() { document.write('<div id="endscreen" class="endscreen" style="width:1000px"><div class="endscreen" style="text-align:center; border:0px solid; padding:10px; font-size:120%; width:800px; float:right"><p><br><br><br>All done!</p></div></div>') })
+			}
+		});
+
+	</script>
+</html>
