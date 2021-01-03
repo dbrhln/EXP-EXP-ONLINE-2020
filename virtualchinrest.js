@@ -30,7 +30,7 @@ jsPsych.plugins["virtualchinrest"] = (function(){
 
       //--------Set up Canvas begin-------
       var circleColor = "#FFFFFF" ; //white
-      var squareColor = "#A0522D" ; //brown
+      var squareColor = "#DC1515" ; //red
       var backgroundColor = "#808080" ;
 
       //Create a canvas element and append it to the DOM

@@ -100,7 +100,12 @@
 				-----------------------------------------*/
 	    var welcome = {
 	      type: "html-keyboard-response",
-	      stimulus: "<p>Welcome to the experiment on decision making with moving dot stimuli.</p>" + "<p>Press any key to begin.</p>",
+	      stimulus: "<p>Welcome to the experiment on decision making with moving dot stimuli.</p>" +
+				"<p>There will be three parts to this experiment.</p>"+
+				"<p>1. Measuring your monitor and distance from the screen (approx. 5 minutes)</p>"+
+				"<p>2. Practice set of trials (approx. 10 minutes)</p>"+
+				"<p>3. Experiment (approx. 30 minutes)</p>"+
+				"<p>Please press any key to begin.</p>",
 	        data: {trial_event: 'instructions'}
 	    };
 
@@ -169,7 +174,8 @@
 		        	{   type: 'html-keyboard-response',
 		            	stimulus: "<p>Before we begin the experiment, please complete this short task</p>"+
 									"<p>so that we can determine the size of your monitor and how far you are sitting from the screen.</p>"+
-									"<p>Please press SPACE to begin.</p>"
+									"<p>Please try not to move around for the duration of the experiment.</p>"+
+									"<p>Press SPACE to begin.</p>"
 		        	},
 					{   type: 'resize-noscale',
 						item_width: 3 + 3/8,
@@ -183,22 +189,41 @@
 					},
 					{
 						type: 'virtualchinrest',
-						stimulus: "Hi there 1!"
+						stimulus: "<p>Now, let's calculate how far you are sitting from the screen.</p>"+
+						"<p>Instructions:</p>"+
+						"<p>1. Close or cover your right eye.</p>"+
+						"<p>2. While keeping your right eye closed, focus on the red square with your left eye.</p>"+
+						"<p>As you focus on the square, the white ball will disappear as it moves towards the left.</p>"+
+						"<p>3. Please press SPACE as quickly as possible when it disappears from your sight.</p>"+
+						"<p>4. Click the 'Start' button to begin. We will do this 3 times.</p>"+
+						"<p><b>Count: 1</b></p>"
 					},
 					{
 						type: 'virtualchinrest',
-						stimulus: "Hi there 2!"
+						stimulus: "<p>Instructions:</p>"+
+						"<p>1. Close or cover your right eye.</p>"+
+						"<p>2. While keeping your right eye closed, focus on the red square with your left eye.</p>"+
+						"<p>As you focus on the square, the white ball will disappear as it moves towards the left.</p>"+
+						"<p>3. Please press SPACE as quickly as possible when it disappears from your sight.</p>"+
+						"<p>4. Click the 'Start' button to begin. We will do this 3 times.</p>"+
+						"<p><b>Count: 2</b></p>"
 					},
 					{
 						type: 'virtualchinrest',
-						stimulus: "Hi there 3!"
-					},
+						stimulus: "<p>Instructions:</p>"+
+						"<p>1. Close or cover your right eye.</p>"+
+						"<p>2. While keeping your right eye closed, focus on the red square with your left eye.</p>"+
+						"<p>As you focus on the square, the white ball will disappear as it moves towards the left.</p>"+
+						"<p>3. Please press SPACE as quickly as possible when it disappears from your sight.</p>"+
+						"<p>4. Click the 'Start' button to begin. We will do this 3 times.</p>"+
+						"<p><b>Count: 3</b></p>"					},
 					{
 						type: 'html-keyboard-response',
 						stimulus: function() {
 								var card_width = jsPsych.data.get().filter({trial_type: "resize-noscale"}).select('final_width_px').values ;
 								var average_dist = jsPsych.data.get().filter({trial_type: "virtualchinrest"}).select('ball_dist').values.reduce((a,b) => a + b,0) / 3 / (card_width/85.6) / (13.5 * Math.PI / 180) ; //Change denominator to match number of trials
-								return "<p>Distance: " + "   " + Math.round(100*average_dist)/1000 + "cm</p>" ;
+								return "<p>Thank you! Your distance from the screen is " + "   " + Math.round(100*average_dist)/1000 + "cm</p>"+
+								"<p> Please press any key to continue." ;
 						}
 					}
 		    		]
@@ -436,7 +461,7 @@
 			type:'fullscreen',
 			fullscreen_mode: true
 		});
-		//experiment_timeline.push(check_distance)
+		experiment_timeline.push(check_distance)
 		experiment_timeline.push(practice_instructions)
 		experiment_timeline.push(start_practice_instructions)
 		experiment_timeline.push(show_pblock)
