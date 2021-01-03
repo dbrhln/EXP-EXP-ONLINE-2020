@@ -7,9 +7,12 @@
     <script src="jspsych-6.1.0/plugins/jspsych-image-keyboard-response.js"></script>
 		<script src="jspsych-6.1.0/plugins/jspsych-fullscreen.js"></script>
     <script src="jspsych-6.1.0/plugins/jspsych-rdk.js"></script>
+		<script src="jspsych-6.1.0/plugins/jspsych-resize-noscale.js"></script>
+		<script src="virtualchinrest.js"></script>
+
     <link href="jspsych-6.1.0/css/jspsych.css" rel="stylesheet" type="text/css"></link>
 
-</head>
+	</head>
 	<body style="background-color:gray;"></body>
 	<script>
 /*<script src="seedrandom.min.js">
@@ -161,6 +164,39 @@
 	/*-----------------------------------------
 	 ------	FUNCTION DEFINITIONS
 	  -----------------------------------------*/
+		var check_distance = {
+		    		timeline: [
+		        	{   type: 'html-keyboard-response',
+		            	stimulus: 'Hi there!'
+		        	},
+					{   type: 'resize-noscale',
+						item_width: 3 + 3/8,
+						item_height: 2 + 1/8,
+						prompt: "<p>Click and drag the lower right corner of the box until the box is the same size as a credit card held up to the screen.</p>",
+						pixels_per_unit: 150
+					},
+					{
+						type: 'virtualchinrest',
+						stimulus: "Hi there 1!"
+					},
+					{
+						type: 'virtualchinrest',
+						stimulus: "Hi there 2!"
+					},
+					{
+						type: 'virtualchinrest',
+						stimulus: "Hi there 3!"
+					},
+					{
+						type: 'html-keyboard-response',
+						stimulus: function() {
+								var card_width = jsPsych.data.get().filter({trial_type: "resize-noscale"}).select('final_width_px').values ;
+								var average_dist = jsPsych.data.get().filter({trial_type: "virtualchinrest"}).select('ball_dist').values.reduce((a,b) => a + b,0) / 3 / (card_width/85.6) / (13.5 * Math.PI / 180) ; //Change denominator to match number of trials
+								return "<p>Distance: " + "   " + Math.round(100*average_dist)/1000 + "cm</p>" ;
+						}
+					}
+		    		]
+				}
 
 	// Function to generate trial
 	// ttype indicates if trial is a 'practice' or 'experiment'
@@ -388,6 +424,11 @@
 			-----------------------------------------*/
 
 		experiment_timeline.push(welcome)
+		experiment_timeline.push({
+			type:'fullscreen',
+			fullscreen_mode: true
+		});
+		experiment_timeline.push(check_distance)
 		experiment_timeline.push(practice_instructions)
 		experiment_timeline.push(start_practice_instructions)
 		experiment_timeline.push(show_pblock)
@@ -410,6 +451,10 @@
 		experiment_timeline.push(debrief_eblock)
 		experiment_timeline.push(show_expblock8)
 		experiment_timeline.push(debrief_eblock)
+		experiment_timeline.push({
+			type: 'fullscreen',
+			fullscreen_mode: false
+		});
 		/*-----------------------------------------
 		 ------	RUN EXPERIMENT & SAVE DATA
 			-----------------------------------------*/
