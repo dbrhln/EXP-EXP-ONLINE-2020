@@ -23,8 +23,8 @@ jsPsych.plugins["virtualchinrest"] = (function(){
     //----------------------------------------------------------------------
     plugin.trial = function(display_element, trial) {
       //HTML text
-      display_element.innerHTML = "<style> h3 {text-align: center;}</style><div id = 'content'><h3>" + trial.stimulus + "</h3></div>" +
-                                    "<style> mybutton {text-align: center;}</style>" + "<div id = 'mybutton'>Click here.</div>" ;
+      display_element.innerHTML = trial.stimulus +
+                                    "<style> mybutton {text-align: center;}</style>" + '<p><button id="mybutton" class="jspsych-btn">'+ "Start."+'</button></p>' ;
 
       document.getElementById("mybutton").addEventListener("click", animateCircleMotion) ;
 
@@ -176,7 +176,7 @@ jsPsych.plugins["virtualchinrest"] = (function(){
 
     function animateCircleMotion() {
       //Stop click button listener and transition to task
-      document.getElementById("mybutton").innerHTML = "Press space to stop." ;
+      //document.getElementById("mybutton").innerHTML = "Press space to stop.</p>" ;
       document.getElementById("mybutton").removeEventListener("click", animateCircleMotion);
 
 			//frameRequestID saves a long integer that is the ID of this frame request. The ID is then used to terminate the request below.

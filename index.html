@@ -11,9 +11,9 @@
 		<script src="virtualchinrest.js"></script>
 
     <link href="jspsych-6.1.0/css/jspsych.css" rel="stylesheet" type="text/css"></link>
-
 	</head>
 	<body style="background-color:gray;"></body>
+
 	<script>
 /*<script src="seedrandom.min.js">
 	Math.seedrandom(subject_id.toString()); */
@@ -167,12 +167,18 @@
 		var check_distance = {
 		    		timeline: [
 		        	{   type: 'html-keyboard-response',
-		            	stimulus: 'Hi there!'
+		            	stimulus: "<p>Before we begin the experiment, please complete this short task</p>"+
+									"<p>so that we can determine the size of your monitor and how far you are sitting from the screen.</p>"+
+									"<p>Please press SPACE to begin.</p>"
 		        	},
 					{   type: 'resize-noscale',
 						item_width: 3 + 3/8,
 						item_height: 2 + 1/8,
-						prompt: "<p>Click and drag the lower right corner of the box until the box is the same size as a credit card held up to the screen.</p>",
+						prompt: "<p>Click and drag the lower right corner of the box until the box is the same size as a credit card held onto the screen.</p>"+
+						"<p>Please ensure that the card is held flat against the screen.</p>"+
+						"<p>If you do not have a credit card, you can also use a driver's license, membership card, or another card of the same size.</p>"+
+						"<p>If you do not have a card, you can use a ruler to measure a width of 3.37 inches or 8.56 cm.</p>"+
+						"<p>Press 'continue' when you are done.</p>",
 						pixels_per_unit: 150
 					},
 					{
@@ -339,6 +345,8 @@
       move_distance: 5, //speed of dots in pixels per frame
       aperture_type: 1, // circle
       aperture_width: 300, //in Pixels
+			aperture_center_x: function(){window.innerWidth/2;}, //off-center in full screen without this code + changing rdk plugin code
+			aperture_center_y: function(){window.innerWidth/2;},
       reinsert_type: 1, //where dot reappears if gone out of bounds, 1 for random
       border: true, //border around aperture
 			background_color: "gray",
@@ -428,7 +436,7 @@
 			type:'fullscreen',
 			fullscreen_mode: true
 		});
-		experiment_timeline.push(check_distance)
+		//experiment_timeline.push(check_distance)
 		experiment_timeline.push(practice_instructions)
 		experiment_timeline.push(start_practice_instructions)
 		experiment_timeline.push(show_pblock)
