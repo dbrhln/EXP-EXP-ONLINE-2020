@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<title>Experiment: Dot Motion</title>
+
     <script src="jspsych-6.1.0/jspsych.js"></script>
 		<script src="jspsych-6.1.0/jquery.min.js"></script>
     <script src="jspsych-6.1.0/plugins/jspsych-html-keyboard-response.js"></script>
@@ -36,14 +38,11 @@
 	    var subject_id = Math.floor(Math.random()*100000);
 
 	    var nBlocks = 8; // Number of experiment blocks (multiple of 8)
-	    //var nPracTrialsPerBlock = 1; // 6 practice
-	    //var nExpTrialsPerBlock = 2;  // 24 experimental trials (repetitions would be nExpTrialsPerBlock/nStim
-
 			var nPracTrials = 10; // 60
 			var nExpTrials = 10; // 20
 
 	    var timeout = 5000;
-	    var iti = 500; // intertrial interval 500
+	    //var iti = 500; // intertrial interval 500
 
 	    var prac_conditions = [1,2,3,4]; // tone, dot #don't need this
 	    var test_conditions = [1,2,3,4]; //[3, 4, 5, 6, 7, 8, 9, 10, 11, 12]; // dim 1, dim 2 garner conditions
@@ -83,10 +82,11 @@
 			var stbBlkB = ['blkB',0.3,0.4] ;
 			var stbBlkC = ['blkC',0.1,0.3] ;
 			var stbBlkD = ['blkD',0.2,0.4] ;
-			var stbBlkA_x = ['blkAx',0.2,0.1];
+			var stbBlkA_x = ['blkAx',0.2,0.1]; // Counterbalanced blocks
 			var stbBlkB_x = ['blkBx',0.4,0.3] ;
 			var stbBlkC_x = ['blkCx',0.3,0.1] ;
 			var stbBlkD_x = ['blkDx',0.4,0.2] ;
+			// Randomise order of blocks
 			var stbBlks = jsPsych.randomization.shuffle([stbBlkA,stbBlkB,stbBlkC,stbBlkD,stbBlkA_x,stbBlkB_x,stbBlkC_x,stbBlkD_x]);
 
 	    // Add data to all trials
@@ -102,9 +102,9 @@
 	      type: "html-keyboard-response",
 	      stimulus: "<p>Welcome to the experiment on decision making with moving dot stimuli.</p>" +
 				"<p>There will be three parts to this experiment.</p>"+
-				"<p>1. Measuring your monitor and distance from the screen (approx. 5 minutes)</p>"+
-				"<p>2. Practice set of trials (approx. 10 minutes)</p>"+
-				"<p>3. Experiment (approx. 30 minutes)</p>"+
+				"<p>1. Measuring your distance from the screen (approx. 5 minutes)</p>"+
+				"<p>2. Practice (approx. 10 minutes)</p>"+
+				"<p>3. Experiment (approx. 40 minutes)</p>"+
 				"<p>Please press any key to begin.</p>",
 	        data: {trial_event: 'instructions'}
 	    };
@@ -143,7 +143,8 @@
 				"<p>There will be 8 blocks. In each block, there are " + String(nExpTrials) + " experiment trials.</p>" +
 				"<p>On each trial, you will be asked to choose between a Patch A and Patch B. Patch A will be a blue circle and Patch B will be a green circle.</p>" +
 				"<p>The patch you have chosen will be presented and you will be asked to indicate if the dots are moving right (by pressing 'f') or left (by pressing 'j')." +
-				"<p>You will be told whether you are correct or incorrect. If you are correct, you will be rewarded 10 points.</p>" +
+				"<p>Please respond as <b>quickly</b> and <b>accurately</b> as possible.</p>"+
+				"<p>If you have indentified the motion direction correctly, you will be rewarded 10 points. If you are wrong, you will get 0 points.</p>" +
 				"<p>At the end of experiment, the total number of points you have accumulated will be converted into a monetary bonus (10 points = 5 cents).</p>" +
 				"<p>Press any key to begin.</p>",
 					data: {trial_event: 'instructions'}
@@ -158,7 +159,10 @@
 			//Selection trial
 			var patch_selection = {
 				type: "html-keyboard-response",
-				stimulus: "Please select either patch A (press 'f') or B (press 'j').",
+				stimulus: function(){
+					var trial_number = jsPsych.data.get().last(2).filter({trial_type:"rdk"}).select('trial_number').values.reduce((a,b)=>Math.max(a,b),0)+1;
+					return "<p>Trial " + trial_number + "</p> <p>Please select either patch A (press 'f') or B (press 'j').</p>"
+				},
 				choices: ['f','j'],
 				on_finish: function(data){
 					data.trial_event = 'Patch selection';
@@ -180,7 +184,8 @@
 					{   type: 'resize-noscale',
 						item_width: 3 + 3/8,
 						item_height: 2 + 1/8,
-						prompt: "<p>Click and drag the lower right corner of the box until the box is the same size as a credit card held onto the screen.</p>"+
+						prompt: "<p>This is to determine the size of your screen.</p>"+
+						"<p>Click and drag the lower right corner of the box until the box is the same size as a credit card held onto the screen.</p>"+
 						"<p>Please ensure that the card is held flat against the screen.</p>"+
 						"<p>If you do not have a credit card, you can also use a driver's license, membership card, or another card of the same size.</p>"+
 						"<p>If you do not have a card, you can use a ruler to measure a width of 3.37 inches or 8.56 cm.</p>"+
@@ -222,7 +227,7 @@
 						stimulus: function() {
 								var card_width = jsPsych.data.get().filter({trial_type: "resize-noscale"}).select('final_width_px').values ;
 								var average_dist = jsPsych.data.get().filter({trial_type: "virtualchinrest"}).select('ball_dist').values.reduce((a,b) => a + b,0) / 3 / (card_width/85.6) / (13.5 * Math.PI / 180) ; //Change denominator to match number of trials
-								return "<p>Thank you! Your distance from the screen is " + "   " + Math.round(100*average_dist)/1000 + "cm</p>"+
+								return "<p>Thank you! Your distance from the screen is " + "   " + Math.round(10*average_dist)/100 + " cm</p>"+
 								"<p> Please press any key to continue." ;
 						}
 					}
@@ -232,7 +237,7 @@
 	// Function to generate trial
 	// ttype indicates if trial is a 'practice' or 'experiment'
 	// coherence is the coherence for the trial
-	var gentrial = function(ttype,coherence,coh_orientation){
+	var gentrial = function(tt,ttype,coherence,coh_orientation){
 		if (coh_orientation == 180) {
 			var cchoice = 'f';
 		} else {
@@ -252,7 +257,7 @@
 			coherent_direction: coh_orientation,
 			coherence: coherence,
 			border_color: patch_color,
-			data: {trial_event: ttype}
+			data: {trial_event: ttype, trial_number: tt+1}
 		}];
 		return RDK_trial;
 	}
@@ -264,7 +269,7 @@
 			var direc = jsPsych.randomization.sampleWithoutReplacement([0,180],1);
 			var newtrial = {
 				timeline: [fixation, base_trial, prac_feedback],
-				timeline_variables: gentrial('Practice',coh[tt],direc)
+				timeline_variables: gentrial(tt,'Practice',coh[tt],direc)
 			}
 			var pblock = pblock.concat(newtrial)
 		}
@@ -279,7 +284,7 @@
 			var direc = jsPsych.randomization.sampleWithReplacement([0,180],2);
 			var newtriala = {
 				timeline: [base_trial],
-				timeline_variables: gentrial('Patch_A',cohvec[0],direc[0]),
+				timeline_variables: gentrial(tt,'Patch_A',cohvec[0],direc[0]),
 				conditional_function: function() {
 					var data = jsPsych.data.get().last(2).values()[0];
 					if (jsPsych.pluginAPI.convertKeyCodeToKeyCharacter(data.key_press) == 'f') {
@@ -291,7 +296,7 @@
 			}
 			var newtrialb = {
 				timeline: [base_trial],
-				timeline_variables: gentrial('Patch_B',cohvec[1],direc[1]),
+				timeline_variables: gentrial(tt,'Patch_B',cohvec[1],direc[1]),
 				conditional_function: function() {
 					var data = jsPsych.data.get().last(2).values()[0];
 					if (jsPsych.pluginAPI.convertKeyCodeToKeyCharacter(data.key_press) == 'j') {
@@ -343,13 +348,23 @@
 	var exp_feedback = {
 	type: 'html-keyboard-response',
 	stimulus: function(){
-			var rewvec = [10,20];
+			var rewvec = [10,0];
+			var last_trial_too_slow = jsPsych.data.get().last(1).values()[0].too_slow; //added
 			var last_trial_correct = jsPsych.data.get().last(1).values()[0].correct;
-			if (last_trial_correct){
-				return "<p>Correct!</p> <p>+"+rewvec[0]+" points</p>";
+			//if (last_trial_correct){
+			//	return "<p>Correct!</p> <p>+"+rewvec[0]+" points</p>";
+			//} else {
+			//	return "<p> Wrong.</p>";
+			//}
+			if(last_trial_too_slow && last_trial_correct){
+					return "<p>Too Slow! Respond Faster!</p>";
+			} else if (last_trial_too_slow && !last_trial_correct){
+					return "<p>Too Slow! Respond Faster!</p>";
+			} else if (!last_trial_too_slow && last_trial_correct){
+					return "<p>Correct!</p><p>+"+rewvec[0]+" points</p>";
 			} else {
-				return "<p> Wrong.</p>";
-			}
+					return "<p>Wrong.</p><p>+"+ rewvec[1]+" points</p>";
+			};
 		},
 	choices: jsPsych.NO_KEYS,
 	data: {trial_event: 'exp_feedback'},
@@ -363,7 +378,7 @@
 			number_of_dots: 50, //Total number of dots in each aperture
 			RDK_type: 4, //The type of RDK used, 4 = different signal dots + random position
 			choices: ['f', 'j'], //Choices available to be keyed in by participant
-			trial_duration: -1, //Duration of each trial in ms, -1 for stimulus to be displayed until response
+			trial_duration: 5000, //Duration of each trial in ms; timeout at 5s. Note: -1 for stimulus to be displayed until response
       response_ends_trial: true,
       dot_radius: 3, //in pixels
       dot_life: 3, //in frames
@@ -382,9 +397,20 @@
 			correct_choice: jsPsych.timelineVariable('correct_choice'),
 			coherent_direction: jsPsych.timelineVariable('coherent_direction'),
 			on_finish: function(data){
-				data.response = jsPsych.pluginAPI.convertKeyCodeToKeyCharacter(data.key_press);
-				data.correct = (data.response == data.correct_choice);
-			}
+					if (data.rt == -1){
+							data.too_slow = true;
+							data.response = false;
+							data.correct = false;
+					} else {
+							data.too_slow = false;
+							data.response = jsPsych.pluginAPI.convertKeyCodeToKeyCharacter(data.key_press);
+							data.correct = (data.response == data.correct_choice);
+					};
+					//function(data){
+					//	data.response = jsPsych.pluginAPI.convertKeyCodeToKeyCharacter(data.key_press);
+					//	data.correct = (data.response == data.correct_choice);
+					//}
+				}
 		}
 
 		//Debrief block
@@ -461,12 +487,12 @@
 			type:'fullscreen',
 			fullscreen_mode: true
 		});
-		experiment_timeline.push(check_distance)
-		experiment_timeline.push(practice_instructions)
-		experiment_timeline.push(start_practice_instructions)
-		experiment_timeline.push(show_pblock)
-		experiment_timeline.push(debrief_pblock)
-		experiment_timeline.push(end_practice_instructions)
+		//experiment_timeline.push(check_distance)
+		//experiment_timeline.push(practice_instructions)
+		//experiment_timeline.push(start_practice_instructions)
+		//experiment_timeline.push(show_pblock)
+		//experiment_timeline.push(debrief_pblock)
+		//experiment_timeline.push(end_practice_instructions)
 		experiment_timeline.push(experiment_instructions)
 		experiment_timeline.push(show_expblock1)
 		experiment_timeline.push(debrief_eblock)
