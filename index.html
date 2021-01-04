@@ -430,15 +430,31 @@
 		var debrief_eblock = {
 			type: "html-keyboard-response",
 			stimulus: function(){
-				var trials = jsPsych.data.get().filter([{trial_event: 'Patch_A'},{trial_event: 'Patch_B'}]);
+				var trials = jsPsych.data.get().last(40).filter([{trial_event: 'Patch_A'},{trial_event: 'Patch_B'}]); //last no. is 4*number of trials per block
 				var correct_trials = trials.filter({correct: true});
 				var accuracy = Math.round(correct_trials.count() / trials.count() * 100);
-				var rt = Math.round(correct_trials.select('rt').mean());
+				var blk_points = Math.round(correct_trials.count()*10)
+				var rt = Math.round(trials.select('rt').mean());
 
-				return "<p>In this experiment block, you earned "+ accuracy +" points.</p>"+
-				"<p>Your average response time was "+rt+"ms.</p>"+
-				"<p>Press any key to complete the experiment. Thank you!</p>";
-			}
+				return "<p>In this experiment block, your accuracy was " + accuracy +"% and you earned "+ blk_points +" points.</p>"+
+				"<p>Your average response time was "+rt+" ms.</p>"+
+				"<p>Press SPACE to continue the experiment.</p>";
+			},
+			choices: [32] // space bar
+		};
+
+		var debrief_exp = {
+			type: "html-keyboard-response",
+			stimulus: function(){
+				var trials = jsPsych.data.get().filter([{trial_event: 'Patch_A'},{trial_event: 'Patch_B'}]);
+				var correct_trials = trials.filter({correct: true});
+				var total_points = 10*correct_trials.count();
+				var total_payment = total_points/5 + 12;
+
+				return "<p>You earned a total of "+total_points +" points, and will be paid a total of $"+ total_payment+" for completing this experiment.</p>"+
+				"<p>Press SPACE to end the experiment Thank you!</p>" ;
+			},
+			choices: [32] //space
 		};
 
 		/*-----------------------------------------
@@ -487,12 +503,12 @@
 			type:'fullscreen',
 			fullscreen_mode: true
 		});
-		//experiment_timeline.push(check_distance)
-		//experiment_timeline.push(practice_instructions)
-		//experiment_timeline.push(start_practice_instructions)
-		//experiment_timeline.push(show_pblock)
-		//experiment_timeline.push(debrief_pblock)
-		//experiment_timeline.push(end_practice_instructions)
+		experiment_timeline.push(check_distance)
+		experiment_timeline.push(practice_instructions)
+		experiment_timeline.push(start_practice_instructions)
+		experiment_timeline.push(show_pblock)
+		experiment_timeline.push(debrief_pblock)
+		experiment_timeline.push(end_practice_instructions)
 		experiment_timeline.push(experiment_instructions)
 		experiment_timeline.push(show_expblock1)
 		experiment_timeline.push(debrief_eblock)
@@ -510,6 +526,7 @@
 		experiment_timeline.push(debrief_eblock)
 		experiment_timeline.push(show_expblock8)
 		experiment_timeline.push(debrief_eblock)
+		experiment_timeline.push(debrief_exp)
 		experiment_timeline.push({
 			type: 'fullscreen',
 			fullscreen_mode: false
