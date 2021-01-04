@@ -105,8 +105,9 @@
 				"<p>1. Measuring your distance from the screen (approx. 5 minutes)</p>"+
 				"<p>2. Practice (approx. 10 minutes)</p>"+
 				"<p>3. Experiment (approx. 40 minutes)</p>"+
-				"<p>Please press any key to begin.</p>",
-	        data: {trial_event: 'instructions'}
+				"<p>Please press SPACE to begin.</p>",
+	      data: {trial_event: 'instructions'},
+				choices: [32]
 	    };
 
 	    var practice_instructions = {
@@ -114,31 +115,34 @@
 	      stimulus: "<p>This experiment begins with 1 block of " + String(nPracTrials)+ " practice trials.</p>" +
 				"<p>The practice block will familiarize you with the moving dot sitmuli.</p>" +
 				"<p>This will be followed by " + String(nBlocks) +" blocks of experiment trials. Each block will have " + String(nExpTrials) + " experiment trials.</p>" +
-	      "<p>Press any key to continue.</p>",
-	        data: {trial_event: 'instructions'}
+	      "<p>Press SPACE to continue.</p>",
+	      data: {trial_event: 'instructions'},
+				choices: [32]
 	    };
 
 	    var start_practice_instructions = {
 	      type: "html-keyboard-response",
 	      stimulus: "<p>This is the practice block.</p>"+
-				"<p>On each trial, you will be asked to indicate if the dots in the circle (the \"patch\") are moving right (by pressing 'f') or left (by pressing 'j')." +
+				"<p>On each trial, you will be asked to indicate if the dots in the circle (the \"patch\") are moving right (by pressing <b>'f'</b>) or left (by pressing <b>'j'</b>)." +
 				"<p>You will be told whether you are correct or incorrect.</p>" +
-				"<p>This task will increase in difficulty across the block of" + String(nPracTrials) + "trials.</p>"+
-				"<p>Press any key to begin the practice trials.</p>",
-	        data: {trial_event: 'instructions'}
+				"<p>This task will increase in difficulty across the block of " + String(nPracTrials) + " trials.</p>"+
+				"<p>Press SPACE to begin the practice trials.</p>",
+	      data: {trial_event: 'instructions'},
+				choices: [32]
 	    };
 
 			// Make moving on to the experiment block contingent on practice performance?
 	    var end_practice_instructions = {
 	      type: "html-keyboard-response",
 	      stimulus: "<p> You have completed the practice block. </p>"+
-				"<p> To move on to the experiment blocks, press any key.</p>",
-	        data: {trial_event: 'instructions'}
+				"<p> To move on to the experiment blocks, press SPACE.</p>",
+	      data: {trial_event: 'instructions'},
+				choices: [32]
 	    };
 
 			var experiment_instructions = {
 				type: "html-keyboard-response",
-				stimulus: "<p>Please read the instructions for the experiment block carefully.</p>" +
+				stimulus: "<p><b>Please read the instructions for the experiment block carefully.</b></p>" +
 				"<p> </p>"+
 				"<p>There will be 8 blocks. In each block, there are " + String(nExpTrials) + " experiment trials.</p>" +
 				"<p>On each trial, you will be asked to choose between a Patch A and Patch B. Patch A will be a blue circle and Patch B will be a green circle.</p>" +
@@ -146,15 +150,16 @@
 				"<p>Please respond as <b>quickly</b> and <b>accurately</b> as possible.</p>"+
 				"<p>If you have indentified the motion direction correctly, you will be rewarded 10 points. If you are wrong, you will get 0 points.</p>" +
 				"<p>At the end of experiment, the total number of points you have accumulated will be converted into a monetary bonus (10 points = 5 cents).</p>" +
-				"<p>Press any key to begin.</p>",
-					data: {trial_event: 'instructions'}
+				"<p>Press SPACE to begin.</p>",
+				data: {trial_event: 'instructions'},
+				choices: [32]
 			};
 
-	    var end_experiment_instructions = {
-	      type: "html-keyboard-response",
-	      stimulus: "<p>Thank you for your participation. You may close your browser window.</p>",
-	        data: {trial_event: 'instructions'}
-	    };
+	    // var end_experiment_instructions = {
+	    //   type: "html-keyboard-response",
+	    //   stimulus: "<p>Thank you for your participation. You may close your browser window.</p>",
+	    //     data: {trial_event: 'instructions'}
+	    // };
 
 			//Selection trial
 			var patch_selection = {
@@ -178,7 +183,7 @@
 		        	{   type: 'html-keyboard-response',
 		            	stimulus: "<p>Before we begin the experiment, please complete this short task</p>"+
 									"<p>so that we can determine the size of your monitor and how far you are sitting from the screen.</p>"+
-									"<p>Please try not to move around for the duration of the experiment.</p>"+
+									"<p>Please sit comfortably and try not to move around for the duration of the experiment.</p>"+
 									"<p>Press SPACE to begin.</p>"
 		        	},
 					{   type: 'resize-noscale',
@@ -221,15 +226,17 @@
 						"<p>As you focus on the square, the white ball will disappear as it moves towards the left.</p>"+
 						"<p>3. Please press SPACE as quickly as possible when it disappears from your sight.</p>"+
 						"<p>4. Click the 'Start' button to begin. We will do this 3 times.</p>"+
-						"<p><b>Count: 3</b></p>"					},
+						"<p><b>Count: 3</b></p>"
+					},
 					{
 						type: 'html-keyboard-response',
 						stimulus: function() {
 								var card_width = jsPsych.data.get().filter({trial_type: "resize-noscale"}).select('final_width_px').values ;
 								var average_dist = jsPsych.data.get().filter({trial_type: "virtualchinrest"}).select('ball_dist').values.reduce((a,b) => a + b,0) / 3 / (card_width/85.6) / (13.5 * Math.PI / 180) ; //Change denominator to match number of trials
-								return "<p>Thank you! Your distance from the screen is " + "   " + Math.round(10*average_dist)/100 + " cm</p>"+
-								"<p> Please press any key to continue." ;
-						}
+								return "<p>Your distance from the screen is " + "   " + Math.round(10*average_dist)/100 + " cm</p>"+
+								"<p> Please press SPACE to continue to the practice block." ;
+						},
+						choices: [32]
 					}
 		    		]
 				}
@@ -333,16 +340,26 @@
 	var prac_feedback = {
 	type: 'html-keyboard-response',
 	stimulus: function(){
+			var last_trial_too_slow = jsPsych.data.get().last(1).values()[0].too_slow; //added
 			var last_trial_correct = jsPsych.data.get().last(1).values()[0].correct;
-			if (last_trial_correct){
-				return "<p>Correct!</p>";
+			// if (last_trial_correct){
+			// 	return "<p>Correct!</p>";
+			// } else {
+			// 	return "<p> Wrong.</p>";
+			// }
+			if(last_trial_too_slow && last_trial_correct){
+					return "<p>Too Slow! Respond Faster!</p><p> (Reminder: Press <b>f</b> for left, <b>j</b> for right)</p>";
+			} else if (last_trial_too_slow && !last_trial_correct){
+					return "<p>Too Slow! Respond Faster!</p><p> (Reminder: Press <b>f</b> for left, <b>j</b> for right)</p>";
+			} else if (!last_trial_too_slow && last_trial_correct){
+					return "<p>Correct!</p><p> (Reminder: Press <b>f</b> for left, <b>j</b> for right)</p>";
 			} else {
-				return "<p> Wrong.</p>";
-			}
+					return "<p>Wrong.</p><p> (Reminder: Press <b>f</b> for left, <b>j</b> for right)</p>";
+			};
 		},
 	choices: jsPsych.NO_KEYS,
 	data: {trial_event: 'prac_feedback'},
-	trial_duration: 1000
+	trial_duration: 1200
 	}
 
 	var exp_feedback = {
@@ -423,9 +440,10 @@
 				var rt = Math.round(correct_trials.select('rt').mean());
 
 				return "<p>In the practice block, you responded correctly on "+accuracy+"% of the trials.</p>"+
-				"<p>Your average response time was "+rt+"ms.</p>"+
-				"<p>Press any key to continue the experiment.</p>";
-			}
+				"<p>Your average response time was "+rt+" ms.</p>"+
+				"<p>Press SPACE to continue the experiment.</p>";
+			},
+			choices: [32] //spacebar
 		};
 		var debrief_eblock = {
 			type: "html-keyboard-response",
@@ -440,7 +458,7 @@
 				"<p>Your average response time was "+rt+" ms.</p>"+
 				"<p>Press SPACE to continue the experiment.</p>";
 			},
-			choices: [32] // space bar
+			choices: [32] // spacebar
 		};
 
 		var debrief_exp = {
@@ -454,7 +472,7 @@
 				return "<p>You earned a total of "+total_points +" points, and will be paid a total of $"+ total_payment+" for completing this experiment.</p>"+
 				"<p>Press SPACE to end the experiment Thank you!</p>" ;
 			},
-			choices: [32] //space
+			choices: [32] //spacebar
 		};
 
 		/*-----------------------------------------
@@ -499,10 +517,10 @@
 			-----------------------------------------*/
 
 		experiment_timeline.push(welcome)
-		experiment_timeline.push({
-			type:'fullscreen',
-			fullscreen_mode: true
-		});
+		// experiment_timeline.push({
+		// 	type:'fullscreen',
+		// 	fullscreen_mode: true
+		// });
 		experiment_timeline.push(check_distance)
 		experiment_timeline.push(practice_instructions)
 		experiment_timeline.push(start_practice_instructions)
