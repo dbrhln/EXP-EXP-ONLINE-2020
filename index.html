@@ -528,7 +528,7 @@
 				var trials = jsPsych.data.get().filter([{trial_event: 'Patch_A'},{trial_event: 'Patch_B'}]);
 				var correct_trials = trials.filter({correct: true});
 				var total_points = 10*correct_trials.count();
-				var total_payment = total_points/5 + 12;
+				var total_payment = total_points/200 + 5;
 
 				return "<p>You earned a total of "+total_points +" points, and will be paid a total of $"+ total_payment+" for completing this experiment.</p>"+
 				"<p>Press SPACE to end the experiment Thank you!</p>" ;
