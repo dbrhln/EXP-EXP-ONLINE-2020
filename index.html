@@ -37,7 +37,8 @@
 	    /* Experiment timelines  */
 	    var experiment_timeline = [];
 
-	    var subject_id = Math.floor(Math.random()*100000);
+	    //var subject_id = Math.floor(Math.random()*100000);
+			var surveycode = "dots_" + makecode();
 
 	    var nBlocks = 8; // Number of experiment blocks (multiple of 8)
 			var nPracTrials = 10; // 60
@@ -94,8 +95,8 @@
 
 	    // Add data to all trials
 	    jsPsych.data.addProperties({
-	        subject: subject_id,
-	        counter_balance: cb[0]
+	        subject: surveycode
+	        //counter_balance: cb[0]
 	    });
 
 			/*--------------- MTurk Code Generator --------------*/
@@ -108,7 +109,16 @@
 					return text;
 			}
 
-
+			//Thank you message
+			function finish(surveycode) {
+				DOM_target = document.querySelector('#jspsych-content');
+				DOM_target.innerHTML ='<p style="font-size:200%;"><strong>Thank you for participating ' +
+				'in this experiment</strong></p> <p style="font-size:150%;">' +
+				'<strong>Your survey code: <font color="blue">' + surveycode +
+				'</font></strong></p>';
+				jsPsych.pluginAPI.cancelAllKeyboardResponses();
+				jsPsych.pluginAPI.clearAllTimeouts();
+			};
 			/*-----------------------------------------
 			 ------	INSTRUCTIONS
 				-----------------------------------------*/
@@ -568,10 +578,10 @@
 			-----------------------------------------*/
 
 		experiment_timeline.push(welcome)
-		// experiment_timeline.push({
-		// 	type:'fullscreen',
-		// 	fullscreen_mode: true
-		// });
+		experiment_timeline.push({
+			type:'fullscreen',
+			fullscreen_mode: true
+		});
 		experiment_timeline.push(survey_trial_demographics)
 		experiment_timeline.push(survey_trial_vision)
 		experiment_timeline.push(check_distance)
@@ -604,10 +614,10 @@
 		/*-----------------------------------------
 		 ------	RUN EXPERIMENT & SAVE DATA
 			-----------------------------------------*/
-		function endExperiment(dataset,message){
+		function endExperiment(dataset){ //message
 			$.post('submit',{"content": dataset}); // uncomment to post data
 			console.log(dataset) // comment out to avoid console log
-			setTimeout(message,1000)
+			//setTimeout(message,1000)
 		}
 
 		jsPsych.init({
@@ -615,10 +625,12 @@
 			on_finish: function(){ //Execute this when the experiment finishes
 				//jsPsych.data.displayData(); //Display the data onto the browser screen
 				//var dataset = jsPsych.data.get().csv()
-				endExperiment(jsPsych.data.get().json() , function() {
-					document.write('<div id="endscreen" class="endscreen" style="width:1000px"><div class="endscreen" style="text-align:center; border:0px solid; padding:10px; font-size:120%; width:800px; float:right"><p><br><br><br>All done!</p></div></div>') })
+				//old message: function() {
+				//	document.write('<div id="endscreen" class="endscreen" style="width:1000px"><div class="endscreen" style="text-align:center; border:0px solid; padding:10px; font-size:120%; width:800px; float:right"><p><br><br><br>All done!</p></div></div>') })}
+				endExperiment(jsPsych.data.get().json()) ;
+				finish(surveycode);
 			}
-		});
+			});
 
 	</script>
 </html>
