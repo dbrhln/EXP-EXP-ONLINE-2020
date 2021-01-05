@@ -110,20 +110,24 @@
 				choices: [32]
 	    };
 
-	    var practice_instructions = {
-	      type: "html-keyboard-response",
-	      stimulus: "<p>This experiment begins with 1 block of " + String(nPracTrials)+ " practice trials.</p>" +
-				"<p>The practice block will familiarize you with the moving dot sitmuli.</p>" +
-				"<p>This will be followed by " + String(nBlocks) +" blocks of experiment trials. Each block will have " + String(nExpTrials) + " experiment trials.</p>" +
-	      "<p>Press SPACE to continue.</p>",
-	      data: {trial_event: 'instructions'},
-				choices: [32]
-	    };
+	    // var practice_instructions = {
+	    //   type: "html-keyboard-response",
+	    //   stimulus: "<p><h3> Practice </h3></p>"+
+			// 	"<p>This experiment has 1 block of " + String(nPracTrials)+ " practice trials.</p>" +
+			// 	"<p>The practice block will familiarize you with the moving dot sitmuli.</p>" +
+			// 	"<p>This will be followed by " + String(nBlocks) +" blocks of experiment trials. Each block will have " + String(nExpTrials) + " experiment trials.</p>" +
+	    //   "<p>Press SPACE to continue.</p>",
+	    //   data: {trial_event: 'instructions'},
+			// 	choices: [32]
+	    // };
 
 	    var start_practice_instructions = {
 	      type: "html-keyboard-response",
-	      stimulus: "<p>This is the practice block.</p>"+
-				"<p>On each trial, you will be asked to indicate if the dots in the circle (the \"patch\") are moving right (by pressing <b>'f'</b>) or left (by pressing <b>'j'</b>)." +
+	      stimulus: "<p><h3> Practice Block </h3></p>"+
+				"<p>The purpose of the practice block is to familiarize you with the moving dot stimuli used in the main experiment.</p>"+
+				"<p>There is 1 block of " + String(nPracTrials) + " practice trials.</p>" +
+				"<p>On each trial, you will be asked to indicate if the dots in the circle (the \"patch\") are moving <b>right</b> (by pressing '<b>f</b>') or <b>left</b> (by pressing '<b>j</b>')." +
+				"<p>Please respond as <b>quickly</b> and <b>accurately</b> as possible.</p>"+
 				"<p>You will be told whether you are correct or incorrect.</p>" +
 				"<p>This task will increase in difficulty across the block of " + String(nPracTrials) + " trials.</p>"+
 				"<p>Press SPACE to begin the practice trials.</p>",
@@ -134,22 +138,22 @@
 			// Make moving on to the experiment block contingent on practice performance?
 	    var end_practice_instructions = {
 	      type: "html-keyboard-response",
-	      stimulus: "<p> You have completed the practice block. </p>"+
-				"<p> To move on to the experiment blocks, press SPACE.</p>",
+	      stimulus: "<p>You have completed the practice.</p>"+
+				"<p>Press SPACE to move on to the main experiment.</p>",
 	      data: {trial_event: 'instructions'},
 				choices: [32]
 	    };
 
 			var experiment_instructions = {
 				type: "html-keyboard-response",
-				stimulus: "<p><b>Please read the instructions for the experiment block carefully.</b></p>" +
-				"<p> </p>"+
-				"<p>There will be 8 blocks. In each block, there are " + String(nExpTrials) + " experiment trials.</p>" +
-				"<p>On each trial, you will be asked to choose between a Patch A and Patch B. Patch A will be a blue circle and Patch B will be a green circle.</p>" +
-				"<p>The patch you have chosen will be presented and you will be asked to indicate if the dots are moving right (by pressing 'f') or left (by pressing 'j')." +
+				stimulus: "<p><h3>Main Experiment</h3></p>"+
+				"<p><b>Please read the instructions for the experiment block carefully.</b></p>" +
+				"<p>There are " + String(nBlocks) +" blocks in this section. In each block, there are " + String(nExpTrials) + " experiment trials.</p>" +
+				"<p>On each trial, you will be asked to choose either <b>Patch A</b> (by pressing '<b>f</b>') or <b>Patch B</b> (by pressing '<b>j</b>'). Patch A will be a blue circle and Patch B will be a green circle.</p>" +
+				"<p>The patch you have chosen will be presented and you will be asked to indicate if the dots are moving <b>right</b> (by pressing '<b>f</b>'') or <b>left</b> (by pressing '<b>j</b>')." +
 				"<p>Please respond as <b>quickly</b> and <b>accurately</b> as possible.</p>"+
-				"<p>If you have indentified the motion direction correctly, you will be rewarded 10 points. If you are wrong, you will get 0 points.</p>" +
-				"<p>At the end of experiment, the total number of points you have accumulated will be converted into a monetary bonus (10 points = 5 cents).</p>" +
+				"<p>If you have indentified the motion direction correctly, you will be rewarded 10 points for the trial. If you are wrong, you will get 0 points.</p>" +
+				"<p>The total number of points you have accumulated will be converted into a monetary bonus (10 points = 5 cents).</p>" +
 				"<p>Press SPACE to begin.</p>",
 				data: {trial_event: 'instructions'},
 				choices: [32]
@@ -275,7 +279,7 @@
 		for (var tt = 0; tt < ntrials; tt++) {
 			var direc = jsPsych.randomization.sampleWithoutReplacement([0,180],1);
 			var newtrial = {
-				timeline: [fixation, base_trial, prac_feedback],
+				timeline: [prac_trialcount,fixation, base_trial, prac_feedback],
 				timeline_variables: gentrial(tt,'Practice',coh[tt],direc)
 			}
 			var pblock = pblock.concat(newtrial)
@@ -335,6 +339,17 @@
 			trial_duration: 1000,
 			data: {trial_event: 'fixation'},
 			background_color: 'black'
+	}
+
+	var prac_trialcount = {
+		type:'html-keyboard-response',
+		stimulus: function(){
+			var trial_number = jsPsych.data.get().last(2).filter({trial_type:"rdk"}).select('trial_number').values.reduce((a,b)=>Math.max(a,b),0)+1;
+			return "<p>Trial " + trial_number + " of "+ String(nPracTrials)+"</p>"
+		},
+		choices:jsPsych.NO_KEYS,
+		data: {trial_event: 'prac_trialcount'},
+		trial_duration: 800
 	}
 
 	var prac_feedback = {
@@ -522,7 +537,6 @@
 		// 	fullscreen_mode: true
 		// });
 		experiment_timeline.push(check_distance)
-		experiment_timeline.push(practice_instructions)
 		experiment_timeline.push(start_practice_instructions)
 		experiment_timeline.push(show_pblock)
 		experiment_timeline.push(debrief_pblock)
