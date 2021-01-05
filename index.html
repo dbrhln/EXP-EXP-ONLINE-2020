@@ -5,7 +5,9 @@
 
     <script src="jspsych-6.1.0/jspsych.js"></script>
 		<script src="jspsych-6.1.0/jquery.min.js"></script>
-    <script src="jspsych-6.1.0/plugins/jspsych-html-keyboard-response.js"></script>
+		<script src="jspsych-6.1.0/plugins/jspsych-survey-text.js"></script>
+		<script src="jspsych-6.1.0/plugins/jspsych-survey-multi-choice.js"></script>
+		<script src="jspsych-6.1.0/plugins/jspsych-html-keyboard-response.js"></script>
     <script src="jspsych-6.1.0/plugins/jspsych-image-keyboard-response.js"></script>
 		<script src="jspsych-6.1.0/plugins/jspsych-fullscreen.js"></script>
     <script src="jspsych-6.1.0/plugins/jspsych-rdk.js"></script>
@@ -40,6 +42,7 @@
 	    var nBlocks = 8; // Number of experiment blocks (multiple of 8)
 			var nPracTrials = 10; // 60
 			var nExpTrials = 10; // 20
+			var nLastEvents = nExpTrials*4 // No. of JsPsych events per block for trial counter
 
 	    var timeout = 5000;
 	    //var iti = 500; // intertrial interval 500
@@ -95,16 +98,28 @@
 	        counter_balance: cb[0]
 	    });
 
+			/*--------------- MTurk Code Generator --------------*/
+			// Survey code generator
+			function makecode() {
+				var text = "";
+				var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+				for (var i = 0; i < 10; i++)
+					text += possible.charAt(Math.floor(Math.random() * possible.length));
+					return text;
+			}
+
+
 			/*-----------------------------------------
 			 ------	INSTRUCTIONS
 				-----------------------------------------*/
 	    var welcome = {
 	      type: "html-keyboard-response",
-	      stimulus: "<p>Welcome to the experiment on decision making with moving dot stimuli.</p>" +
-				"<p>There will be three parts to this experiment.</p>"+
-				"<p>1. Measuring your distance from the screen (approx. 5 minutes)</p>"+
-				"<p>2. Practice (approx. 10 minutes)</p>"+
-				"<p>3. Experiment (approx. 40 minutes)</p>"+
+	      stimulus: "<p><h3>Welcome to the experiment on decision making with moving dot stimuli!</h3></p>" +
+				"<p>There will be four parts to this experiment.</p>"+
+				"<p>1. Short Survey (approx. 2 minutes)</p>"+
+				"<p>2. Measurement Task (approx. 5 minutes)</p>"+
+				"<p>3. Practice (approx. 10 minutes)</p>"+
+				"<p>4. Main Experiment (approx. 40 minutes)</p>"+
 				"<p>Please press SPACE to begin.</p>",
 	      data: {trial_event: 'instructions'},
 				choices: [32]
@@ -123,7 +138,7 @@
 
 	    var start_practice_instructions = {
 	      type: "html-keyboard-response",
-	      stimulus: "<p><h3> Practice Block </h3></p>"+
+	      stimulus: "<p><h3> Practice </h3></p>"+
 				"<p>The purpose of the practice block is to familiarize you with the moving dot stimuli used in the main experiment.</p>"+
 				"<p>There is 1 block of " + String(nPracTrials) + " practice trials.</p>" +
 				"<p>On each trial, you will be asked to indicate if the dots in the circle (the \"patch\") are moving <b>right</b> (by pressing '<b>f</b>') or <b>left</b> (by pressing '<b>j</b>')." +
@@ -179,14 +194,35 @@
 				}
 			}
 
+			/*--------------- Survey for Details --------------*/
+
+			var survey_trial_demographics = {
+				type: 'survey-text',
+				preamble: "<p>Before we begin, please answer the following questions.</p>",
+				questions: [
+					{prompt: "How old are you?", name: 'Age', placeholder:"e.g., 31",required:true},
+					{prompt: "What is your gender?", name: 'Gender', placeholder:"e.g., Female, Male, Other, Prefer Not To Say", required:true}
+				]
+			}
+
+			var yesno_options = ["Yes","No"]
+			var survey_trial_vision = {
+				type: 'survey-multi-choice',
+				questions: [
+					{prompt: "Do you have normal/corrected vision?", name: 'Vision', options:yesno_options, required:true},
+					{prompt: "Are you color blind?", name: "Colorblind", options:yesno_options, required:true}
+				]
+			}
+
 	/*-----------------------------------------
 	 ------	FUNCTION DEFINITIONS
 	  -----------------------------------------*/
 		var check_distance = {
 		    		timeline: [
 		        	{   type: 'html-keyboard-response',
-		            	stimulus: "<p>Before we begin the experiment, please complete this short task</p>"+
-									"<p>so that we can determine the size of your monitor and how far you are sitting from the screen.</p>"+
+		            	stimulus: "<p><h3>Measurement Task</h3></p>"+
+									"<p>Please complete this short task so that we can determine </p>"+
+									"<p>the size of your monitor and how far you are sitting from the screen.</p>"+
 									"<p>Please sit comfortably and try not to move around for the duration of the experiment.</p>"+
 									"<p>Press SPACE to begin.</p>"
 		        	},
@@ -238,7 +274,7 @@
 								var card_width = jsPsych.data.get().filter({trial_type: "resize-noscale"}).select('final_width_px').values ;
 								var average_dist = jsPsych.data.get().filter({trial_type: "virtualchinrest"}).select('ball_dist').values.reduce((a,b) => a + b,0) / 3 / (card_width/85.6) / (13.5 * Math.PI / 180) ; //Change denominator to match number of trials
 								return "<p>Your distance from the screen is " + "   " + Math.round(10*average_dist)/100 + " cm</p>"+
-								"<p> Please press SPACE to continue to the practice block." ;
+								"<p> Please press SPACE to continue to the next section." ;
 						},
 						choices: [32]
 					}
@@ -463,7 +499,7 @@
 		var debrief_eblock = {
 			type: "html-keyboard-response",
 			stimulus: function(){
-				var trials = jsPsych.data.get().last(40).filter([{trial_event: 'Patch_A'},{trial_event: 'Patch_B'}]); //last no. is 4*number of trials per block
+				var trials = jsPsych.data.get().last(nLastEvents).filter([{trial_event: 'Patch_A'},{trial_event: 'Patch_B'}]); //last no. is 4*number of trials per block
 				var correct_trials = trials.filter({correct: true});
 				var accuracy = Math.round(correct_trials.count() / trials.count() * 100);
 				var blk_points = Math.round(correct_trials.count()*10)
@@ -536,6 +572,8 @@
 		// 	type:'fullscreen',
 		// 	fullscreen_mode: true
 		// });
+		experiment_timeline.push(survey_trial_demographics)
+		experiment_timeline.push(survey_trial_vision)
 		experiment_timeline.push(check_distance)
 		experiment_timeline.push(start_practice_instructions)
 		experiment_timeline.push(show_pblock)
@@ -577,7 +615,8 @@
 			on_finish: function(){ //Execute this when the experiment finishes
 				//jsPsych.data.displayData(); //Display the data onto the browser screen
 				//var dataset = jsPsych.data.get().csv()
-				endExperiment(jsPsych.data.get().json() , function() { document.write('<div id="endscreen" class="endscreen" style="width:1000px"><div class="endscreen" style="text-align:center; border:0px solid; padding:10px; font-size:120%; width:800px; float:right"><p><br><br><br>All done!</p></div></div>') })
+				endExperiment(jsPsych.data.get().json() , function() {
+					document.write('<div id="endscreen" class="endscreen" style="width:1000px"><div class="endscreen" style="text-align:center; border:0px solid; padding:10px; font-size:120%; width:800px; float:right"><p><br><br><br>All done!</p></div></div>') })
 			}
 		});
 
