@@ -9,6 +9,9 @@ handlers:
 - url: /.*
   script: backend.application
 
+- url: /debrief
+  script: debrief.html
+
 libraries:
 - name: webapp2
   version: latest
