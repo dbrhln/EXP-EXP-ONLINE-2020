@@ -12,7 +12,7 @@
 		<script src="jspsych-6.1.0/plugins/jspsych-fullscreen.js"></script>
     <script src="jspsych-6.1.0/plugins/jspsych-rdk.js"></script>
 		<script src="jspsych-6.1.0/plugins/jspsych-resize-noscale.js"></script>
-		<script src="virtualchinrest.js"></script>
+		<script src="jspsych-6.1.0/plugins/virtualchinrest.js"></script>
 
     <link href="jspsych-6.1.0/css/jspsych.css" rel="stylesheet" type="text/css"></link>
 	</head>
@@ -115,7 +115,9 @@
 				DOM_target.innerHTML ='<p style="font-size:200%;"><strong>Thank you for participating ' +
 				'in this experiment</strong></p> <p style="font-size:150%;">' +
 				'<strong>Your survey code: <font color="blue">' + surveycode +
-				'</font></strong></p>';
+				'</font></strong></p>'+
+				'<p>Please ensure that you have copied the survey code before closing this window.</p>'+
+				'<p>If you would like to know more about this research, click <a href="https://exp-exp-289600.ts.r.appspot.com/debrief/debrief.html" target="_blank" rel="noopener noreferrer"> here</a> after copying the survey code.</p>';
 				jsPsych.pluginAPI.cancelAllKeyboardResponses();
 				jsPsych.pluginAPI.clearAllTimeouts();
 			};
@@ -125,11 +127,15 @@
 	    var welcome = {
 	      type: "html-keyboard-response",
 	      stimulus: "<p><h3>Welcome to the experiment on decision making with moving dot stimuli!</h3></p>" +
+				"<p>Thank you for accepting the HIT.</p>"+
+				"<p>This is a psychological study by the Knowledge, Information, and Learning Laboratory at the University of Melbourne.</p>"+
 				"<p>There will be four parts to this experiment.</p>"+
-				"<p>1. Short Survey (approx. 2 minutes)</p>"+
+				"<p>1. Short survey asking for demographic information (approx. 2 minutes)</p>"+
 				"<p>2. Measurement Task (approx. 5 minutes)</p>"+
 				"<p>3. Practice (approx. 10 minutes)</p>"+
-				"<p>4. Main Experiment (approx. 40 minutes)</p>"+
+				"<p>4. Main Experiment (approx. 20 minutes)</p>"+
+				"<p> At the end of the experiment, we will provide you with a completion code that you need to get paid for the HIT.</p>"+
+				"<p> For this experiment, you will be paid $5 plus a bonus depending on your performance in the main experiment."+
 				"<p>Please press SPACE to begin.</p>",
 	      data: {trial_event: 'instructions'},
 				choices: [32]
@@ -155,9 +161,9 @@
 				"<p>Please respond as <b>quickly</b> and <b>accurately</b> as possible.</p>"+
 				"<p>You will be told whether you are correct or incorrect.</p>" +
 				"<p>This task will increase in difficulty across the block of " + String(nPracTrials) + " trials.</p>"+
-				"<p>Press SPACE to begin the practice trials.</p>",
+				"<p>Press <b>N</b> to begin the practice trials.</p>",
 	      data: {trial_event: 'instructions'},
-				choices: [32]
+				choices: ['N']
 	    };
 
 			// Make moving on to the experiment block contingent on practice performance?
@@ -179,9 +185,9 @@
 				"<p>Please respond as <b>quickly</b> and <b>accurately</b> as possible.</p>"+
 				"<p>If you have indentified the motion direction correctly, you will be rewarded 10 points for the trial. If you are wrong, you will get 0 points.</p>" +
 				"<p>The total number of points you have accumulated will be converted into a monetary bonus (10 points = 5 cents).</p>" +
-				"<p>Press SPACE to begin.</p>",
+				"<p>Press <b>N</b> to begin.</p>",
 				data: {trial_event: 'instructions'},
-				choices: [32]
+				choices: ['N']
 			};
 
 	    // var end_experiment_instructions = {
@@ -528,10 +534,11 @@
 				var trials = jsPsych.data.get().filter([{trial_event: 'Patch_A'},{trial_event: 'Patch_B'}]);
 				var correct_trials = trials.filter({correct: true});
 				var total_points = 10*correct_trials.count();
-				var total_payment = total_points/200 + 5;
+				var bonus_payment = total_points/200;
 
-				return "<p>You earned a total of "+total_points +" points, and will be paid a total of $"+ total_payment+" for completing this experiment.</p>"+
-				"<p>Press SPACE to end the experiment Thank you!</p>" ;
+				return "<p>You earned a total of "+total_points +" points, and will be paid $5 plus a bonus of $"+ bonus_payment+" for completing this experiment.</p>"+
+				"<p>Press SPACE to end the experiment and obtain your survey code.</p>"+
+				"<p>Thank you!</p>" ;
 			},
 			choices: [32] //spacebar
 		};
