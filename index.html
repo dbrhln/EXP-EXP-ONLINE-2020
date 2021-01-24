@@ -117,7 +117,7 @@
 				'<strong>Your survey code: <font color="blue">' + surveycode +
 				'</font></strong></p>'+
 				'<p>Please ensure that you have copied the survey code before closing this window.</p>'+
-				'<p>If you would like to know more about this research, click <a href="https://exp-exp-289600.ts.r.appspot.com/debrief/debrief.html" target="_blank" rel="noopener noreferrer"> here</a> after copying the survey code.</p>';
+				'<p>If you would like to know more about this research, click <a href="debrief/debrief.html" target="_blank" rel="noopener noreferrer"> here</a> after copying the survey code.</p>';
 				jsPsych.pluginAPI.cancelAllKeyboardResponses();
 				jsPsych.pluginAPI.clearAllTimeouts();
 			};
@@ -134,8 +134,9 @@
 				"<p>2. Measurement Task (approx. 5 minutes)</p>"+
 				"<p>3. Practice (approx. 10 minutes)</p>"+
 				"<p>4. Main Experiment (approx. 20 minutes)</p>"+
-				"<p> At the end of the experiment, we will provide you with a completion code that you need to get paid for the HIT.</p>"+
+				"<p> At the end of the experiment, we will provide you with a survey completion code that you need to get paid for the HIT.</p>"+
 				"<p> For this experiment, you will be paid $5 plus a bonus depending on your performance in the main experiment."+
+				"<p> <i>Please do not press the back button at any point or your progress will be lost!</i> </p>"+
 				"<p>Please press SPACE to begin.</p>",
 	      data: {trial_event: 'instructions'},
 				choices: [32]
@@ -157,7 +158,7 @@
 	      stimulus: "<p><h3> Practice </h3></p>"+
 				"<p>The purpose of the practice block is to familiarize you with the moving dot stimuli used in the main experiment.</p>"+
 				"<p>There is 1 block of " + String(nPracTrials) + " practice trials.</p>" +
-				"<p>On each trial, you will be asked to indicate if the dots in the circle (the \"patch\") are moving <b>right</b> (by pressing '<b>f</b>') or <b>left</b> (by pressing '<b>j</b>')." +
+				"<p>On each trial, you will be asked to indicate if the dots in the circle (the \"patch\") are moving <b>left</b> (by pressing '<b>f</b>') or <b>right</b> (by pressing '<b>j</b>')." +
 				"<p>Please respond as <b>quickly</b> and <b>accurately</b> as possible.</p>"+
 				"<p>You will be told whether you are correct or incorrect.</p>" +
 				"<p>This task will increase in difficulty across the block of " + String(nPracTrials) + " trials.</p>"+
@@ -180,8 +181,10 @@
 				stimulus: "<p><h3>Main Experiment</h3></p>"+
 				"<p><b>Please read the instructions for the experiment block carefully.</b></p>" +
 				"<p>There are " + String(nBlocks) +" blocks in this section. In each block, there are " + String(nExpTrials) + " experiment trials.</p>" +
+				"<p>In each block of trials, there will be two patches that you can choose from, Patch A and Patch B. The two patches will differ in their level of difficulty.</p>"+
+				"<p>The levels of difficulty of Patch A and B will be kept constant within each block, but will be different from block to block (e.g., in one block, A will be easier, but in the next block, B might be easier).</p>"+
 				"<p>On each trial, you will be asked to choose either <b>Patch A</b> (by pressing '<b>f</b>') or <b>Patch B</b> (by pressing '<b>j</b>'). Patch A will be a blue circle and Patch B will be a green circle.</p>" +
-				"<p>The patch you have chosen will be presented and you will be asked to indicate if the dots are moving <b>right</b> (by pressing '<b>f</b>'') or <b>left</b> (by pressing '<b>j</b>')." +
+				"<p>The patch you have chosen will be presented and you will be asked to indicate if the dots are moving <b>left</b> (by pressing '<b>f</b>'') or <b>right</b> (by pressing '<b>j</b>')." +
 				"<p>Please respond as <b>quickly</b> and <b>accurately</b> as possible.</p>"+
 				"<p>If you have indentified the motion direction correctly, you will be rewarded 10 points for the trial. If you are wrong, you will get 0 points.</p>" +
 				"<p>The total number of points you have accumulated will be converted into a monetary bonus (10 points = 5 cents).</p>" +
@@ -300,7 +303,7 @@
 	// Function to generate trial
 	// ttype indicates if trial is a 'practice' or 'experiment'
 	// coherence is the coherence for the trial
-	var gentrial = function(tt,ttype,coherence,coh_orientation){
+	var gentrial = function(tt,ttype,coherence,coh_orientation,blkNumber,coh_alt){
 		if (coh_orientation == 180) {
 			var cchoice = 'f';
 		} else {
@@ -320,7 +323,7 @@
 			coherent_direction: coh_orientation,
 			coherence: coherence,
 			border_color: patch_color,
-			data: {trial_event: ttype, trial_number: tt+1}
+			data: {trial_event: ttype, trial_number: tt+1, blkNumber: blkNumber, coh_alt: coh_alt}
 		}];
 		return RDK_trial;
 	}
@@ -332,7 +335,7 @@
 			var direc = jsPsych.randomization.sampleWithoutReplacement([0,180],1);
 			var newtrial = {
 				timeline: [prac_trialcount,fixation, base_trial, prac_feedback],
-				timeline_variables: gentrial(tt,'Practice',coh[tt],direc)
+				timeline_variables: gentrial(tt,'Practice',coh[tt],direc,0,0)
 			}
 			var pblock = pblock.concat(newtrial)
 		}
@@ -340,14 +343,14 @@
 	}
 
 	//Function to create experiment block
-	var genExpblock = function(ntrials,blkType,cohvec) {
+	var genExpblock = function(ntrials,blkType,cohvec,blkNumber) {
 		var expblock = [];
 
 		for (var tt=0; tt < ntrials; tt++) {
 			var direc = jsPsych.randomization.sampleWithReplacement([0,180],2);
 			var newtriala = {
 				timeline: [base_trial],
-				timeline_variables: gentrial(tt,'Patch_A',cohvec[0],direc[0]),
+				timeline_variables: gentrial(tt,'Patch_A',cohvec[0],direc[0],blkNumber,cohvec[1]),
 				conditional_function: function() {
 					var data = jsPsych.data.get().last(2).values()[0];
 					if (jsPsych.pluginAPI.convertKeyCodeToKeyCharacter(data.key_press) == 'f') {
@@ -359,7 +362,7 @@
 			}
 			var newtrialb = {
 				timeline: [base_trial],
-				timeline_variables: gentrial(tt,'Patch_B',cohvec[1],direc[1]),
+				timeline_variables: gentrial(tt,'Patch_B',cohvec[1],direc[1],blkNumber,cohvec[0]),
 				conditional_function: function() {
 					var data = jsPsych.data.get().last(2).values()[0];
 					if (jsPsych.pluginAPI.convertKeyCodeToKeyCharacter(data.key_press) == 'j') {
@@ -371,7 +374,7 @@
 			}
 
 			var newtrial = {
-				data: {blkType: blkType},
+				data: {blkType: blkType,blkNumber:blkNumber},
 				timeline: [patch_selection, fixation, newtriala, newtrialb, exp_feedback]
 			}
 			var expblock = expblock.concat( newtrial );
@@ -426,7 +429,7 @@
 		},
 	choices: jsPsych.NO_KEYS,
 	data: {trial_event: 'prac_feedback'},
-	trial_duration: 1200
+	trial_duration: 700
 	}
 
 	var exp_feedback = {
@@ -452,7 +455,7 @@
 		},
 	choices: jsPsych.NO_KEYS,
 	data: {trial_event: 'exp_feedback'},
-	trial_duration: 1000
+	trial_duration: 700
 	}
 
 		//Define RDK stimulus
@@ -521,7 +524,9 @@
 				var blk_points = Math.round(correct_trials.count()*10)
 				var rt = Math.round(trials.select('rt').mean());
 
-				return "<p>In this experiment block, your accuracy was " + accuracy +"% and you earned "+ blk_points +" points.</p>"+
+				var blkNumber = jsPsych.data.get().last(1).select('blkNumber').values;
+
+				return "<p>In experiment block " + blkNumber + ", your accuracy was " + accuracy +"% and you earned "+ blk_points +" points.</p>"+
 				"<p>Your average response time was "+rt+" ms.</p>"+
 				"<p>Press SPACE to continue the experiment.</p>";
 			},
@@ -540,7 +545,8 @@
 				"<p>Press SPACE to end the experiment and obtain your survey code.</p>"+
 				"<p>Thank you!</p>" ;
 			},
-			choices: [32] //spacebar
+			choices: [32], //spacebar
+			data: {trial_event: 'final_debrief'}
 		};
 
 		/*-----------------------------------------
@@ -561,14 +567,14 @@
 		}
 
 		if (experiment_type =='stable'){
-			var expblock1 = genExpblock(nExpTrials,stbBlks[0][0],stbBlks[0].slice(1,3))
-			var expblock2 = genExpblock(nExpTrials,stbBlks[1][0],stbBlks[1].slice(1,3))
-			var expblock3 = genExpblock(nExpTrials,stbBlks[2][0],stbBlks[2].slice(1,3))
-			var expblock4 = genExpblock(nExpTrials,stbBlks[3][0],stbBlks[3].slice(1,3))
-			var expblock5 = genExpblock(nExpTrials,stbBlks[4][0],stbBlks[4].slice(1,3))
-			var expblock6 = genExpblock(nExpTrials,stbBlks[5][0],stbBlks[5].slice(1,3))
-			var expblock7 = genExpblock(nExpTrials,stbBlks[6][0],stbBlks[6].slice(1,3))
-			var expblock8 = genExpblock(nExpTrials,stbBlks[7][0],stbBlks[7].slice(1,3))
+			var expblock1 = genExpblock(nExpTrials,stbBlks[0][0],stbBlks[0].slice(1,3),1)
+			var expblock2 = genExpblock(nExpTrials,stbBlks[1][0],stbBlks[1].slice(1,3),2)
+			var expblock3 = genExpblock(nExpTrials,stbBlks[2][0],stbBlks[2].slice(1,3),3)
+			var expblock4 = genExpblock(nExpTrials,stbBlks[3][0],stbBlks[3].slice(1,3),4)
+			var expblock5 = genExpblock(nExpTrials,stbBlks[4][0],stbBlks[4].slice(1,3),5)
+			var expblock6 = genExpblock(nExpTrials,stbBlks[5][0],stbBlks[5].slice(1,3),6)
+			var expblock7 = genExpblock(nExpTrials,stbBlks[6][0],stbBlks[6].slice(1,3),7)
+			var expblock8 = genExpblock(nExpTrials,stbBlks[7][0],stbBlks[7].slice(1,3),8)
 
 			var show_expblock1 = {timeline: expblock1}
 			var show_expblock2 = {timeline: expblock2}

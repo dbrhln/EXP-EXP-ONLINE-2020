@@ -6,11 +6,11 @@ handlers:
 - url: /jspsych-6.1.0
   static_dir: jspsych-6.1.0
 
+- url: /debrief
+  static_dir: debrief
+
 - url: /.*
   script: backend.application
-
-- url: /debrief
-  script: debrief.html
 
 libraries:
 - name: webapp2
