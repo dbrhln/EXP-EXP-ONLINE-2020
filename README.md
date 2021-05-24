@@ -7,7 +7,9 @@ operationalised as choosing to do the same task on the next trial. The mean leve
 
 The entire experiment comprises four parts: (1) a short demographic questionnaire, (2) a measurement task to detect participants' viewing distance
 (based on Li, Sung, Yeatman, & Reinecke, 2020), (3) 60 practice trials for the RDK direction judgment task, and (4) main experiment comprising
-8 blocks of 20 trials. The experiment was coded in javascript + html/css and hosted on Google App Engine for deployment on Amazon Mechanical Turk.  
+8 blocks of 20 trials. The experiment was coded in javascript + html/css and hosted on Google App Engine for deployment on Amazon Mechanical Turk. 
+
+The experiment can be viewed [here](https://exp-exp-289600.ts.r.appspot.com/).
 
 ## Contents
 - *index.html* - experiment
