@@ -98,12 +98,13 @@ for (i in 1:length(batch$Answer.surveycode)){
 }
 
 unmatched_turk <- batch$Answer.surveycode[c(22,41,49,63)]
-
+#"A2V27A9GZA1NR2"  "dots_hhpDUxFYLK" "dots_7TMTbxXGGk" "dots_rA29YyDm8w"
 matched_codes <- vector(length=length(subjectdata$subject))
 for (i in 1:length(subjectdata$subject)){
   matched_codes[i] <- subjectdata$subject[i] %in% allbatch$Answer.surveycode
 }
 
 unmatched_codes <- subjectdata$subject[c(25,32)]
+#"dots_2EkaA4lRFp" "dots_M4rnT8aoA4"
 
 ###########################################
