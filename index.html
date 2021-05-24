@@ -27,10 +27,6 @@
 	Rajananda, S., Lau, H. & Odegaard, B., (2018). A Random-Dot Kinematogram for Web-Based Vision Research. Journal of Open Research Software. 6(1), p.6. DOI: [http://doi.org/10.5334/jors.194]
 	*/
 
-
-	/* to do: add patch-contingent rewards calculated based on training; timeouts; cohvec for different blocks (stable + change point); data output; check trial times
-	*/
-
 	/*-----------------------------------------
 	 ------	EXPERIMENTAL PARAMETERS
 		-----------------------------------------*/
@@ -142,17 +138,6 @@
 				choices: [32]
 	    };
 
-	    // var practice_instructions = {
-	    //   type: "html-keyboard-response",
-	    //   stimulus: "<p><h3> Practice </h3></p>"+
-			// 	"<p>This experiment has 1 block of " + String(nPracTrials)+ " practice trials.</p>" +
-			// 	"<p>The practice block will familiarize you with the moving dot sitmuli.</p>" +
-			// 	"<p>This will be followed by " + String(nBlocks) +" blocks of experiment trials. Each block will have " + String(nExpTrials) + " experiment trials.</p>" +
-	    //   "<p>Press SPACE to continue.</p>",
-	    //   data: {trial_event: 'instructions'},
-			// 	choices: [32]
-	    // };
-
 	    var start_practice_instructions = {
 	      type: "html-keyboard-response",
 	      stimulus: "<p><h3> Practice </h3></p>"+
@@ -192,12 +177,6 @@
 				data: {trial_event: 'instructions'},
 				choices: ['N']
 			};
-
-	    // var end_experiment_instructions = {
-	    //   type: "html-keyboard-response",
-	    //   stimulus: "<p>Thank you for your participation. You may close your browser window.</p>",
-	    //     data: {trial_event: 'instructions'}
-	    // };
 
 			//Selection trial
 			var patch_selection = {
@@ -438,11 +417,6 @@
 			var rewvec = [10,0];
 			var last_trial_too_slow = jsPsych.data.get().last(1).values()[0].too_slow; //added
 			var last_trial_correct = jsPsych.data.get().last(1).values()[0].correct;
-			//if (last_trial_correct){
-			//	return "<p>Correct!</p> <p>+"+rewvec[0]+" points</p>";
-			//} else {
-			//	return "<p> Wrong.</p>";
-			//}
 			if(last_trial_too_slow && last_trial_correct){
 					return "<p>Too Slow! Respond Faster!</p>";
 			} else if (last_trial_too_slow && !last_trial_correct){
