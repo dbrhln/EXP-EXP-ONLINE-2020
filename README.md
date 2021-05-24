@@ -15,7 +15,7 @@ The entire experiment comprises four parts: (1) a short demographic questionnair
 - *virtualchinrest.js* - additional jspsych plugin for the measurement task (a "virtual chinrest")
 - *backend.py, app.yaml, bulkbuilder.yaml* - scripts for hosting the experiment on Google App Engine. *backend.py* is for writes to the datastore. *app.yaml* 
 specifies how URL paths correspond to request handlers and static files. *bulkbuilder.yaml* contains the build properties.
-- *debrief* - folder containing the debriefing page. To download, run "python downloadall.py > mydata.json" in the terminal.
+- *debrief* - folder containing the debriefing page
 - *download* - folder containing downloaded data in json format (*mydata.json*) and scripts for downloading (*downloadall.py*) and cleaning data (*clean_json.R*)
 - *jspsych-6.1.0* - js library for running behavioural experiments online (downloaded from www.jspsych.org)
 
