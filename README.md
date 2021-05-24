@@ -1,7 +1,7 @@
 # EXP-EXP-ONLINE-2020
 
-This repository contains the relevant scripts for the online version of the experiment for my PhD on exploration and exploitation. In the experiment,
-participants are repeatedly asked to choose between two random dot kinematogram (RDK) direction judgment tasks varying in difficulty and obtain a
+This repository contains the relevant scripts for the online version of the experiment for my PhD on exploration and exploitation in multi-armed bandit problems. 
+In the experiment, participants are repeatedly asked to choose between two random dot kinematogram (RDK) direction judgment tasks varying in difficulty and obtain a
 reward if they do the task correctly. Exploration is operationalised as choosing to do the alternate task on the next trial, and exploitation is
 operationalised as choosing to do the same task on the next trial. The mean level of difficulty and difference in difficulty between the two presented RDK tasks are manipulated for this experiment. Direction judgment and stay/switch choices and response times are recorded for every trial.
 
