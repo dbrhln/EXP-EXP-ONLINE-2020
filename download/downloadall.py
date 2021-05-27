@@ -1,5 +1,3 @@
-#export GOOGLE_APPLICATION_CREDENTIALS="C:/users/alanw/Desktop/Exp-App-TEST-7bdd7c483097.json"
-
 # Imports the Google Cloud client library
 from google.cloud import datastore
 
@@ -7,7 +5,7 @@ from google.cloud import datastore
 import json
 
 import os
-credential_path = "/Users/deborahlin/Desktop/Exp-Exp-190f0e3e405b.json"
+credential_path = "/my/credential/path/here"
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credential_path
 
 # Instantiates a client
