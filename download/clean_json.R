@@ -82,29 +82,3 @@ subjectdata <- alldata_subject %>% select(subject,bonus) %>% filter(!is.na(bonus
                     left_join(alldata_subject %>% select(subject,age,gender) %>% filter(age != "<NA>"),by = c("subject")) %>%
                     left_join(alldata_subject %>% select(subject,vision,colorblind) %>% filter(vision != "<NA>"),by = c("subject")) %>%
                     left_join(alldata_subject %>% select(subject,distance) %>% filter(distance != "<NA>"),by = c("subject"))
-###########################################
-#search for entry
-subjectdata[subjectdata$subject=="dots_rA29YyDm8w",]
-
-##MYSTERY CODES##
-#checking batch file
-batch <- read.csv("/Users/deborahlin/Downloads/Batch_4315620_batch_results.csv",header=TRUE)
-batch2 <- read.csv("/Users/deborahlin/Downloads/Batch_4312789_batch_results.csv",header=TRUE) #first 9
-allbatch <- rbind(batch,batch2)
-
-real <- vector(length=length(batch$Answer.surveycode))
-for (i in 1:length(batch$Answer.surveycode)){
-  real[i] <- batch$Answer.surveycode[i] %in% subjectdata$subject  
-}
-
-unmatched_turk <- batch$Answer.surveycode[c(22,41,49,63)]
-#"A2V27A9GZA1NR2"  "dots_hhpDUxFYLK" "dots_7TMTbxXGGk" "dots_rA29YyDm8w"
-matched_codes <- vector(length=length(subjectdata$subject))
-for (i in 1:length(subjectdata$subject)){
-  matched_codes[i] <- subjectdata$subject[i] %in% allbatch$Answer.surveycode
-}
-
-unmatched_codes <- subjectdata$subject[c(25,32)]
-#"dots_2EkaA4lRFp" "dots_M4rnT8aoA4"
-
-###########################################
